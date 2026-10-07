@@ -1,0 +1,29 @@
+# Messages d'EterRtp, format MiniMessage : https://docs.advntr.dev/minimessage/format
+# Balises de la palette (EterLib/config.yml > language.colors) : <primary> <accent> <info> <error> <success>
+#   <info> = texte courant gris clair, <accent> = mots importants en orange.
+# Les valeurs entre <> comme <player> sont remplies par le plugin. Pour afficher un "<", écrire \< entre 'guillemets simples'.
+# Une clé absente reprend le texte intégré au plugin : tu peux ne garder que les lignes que tu modifies.
+# Le préfixe des messages (« Core ») est commun à tous les plugins : EterLib/config.yml > language.prefix.
+# Textes communs (« Annuler », « Joueur inconnu », « Commande réservée aux joueurs »...) : dans EterLib/lang/, pour tous les plugins.
+
+rtp:
+  label: "Destination inconnue"
+  no-world: "<error>Aucun monde n'est proposé pour /rtp sur ce serveur."
+  world-missing: "<error>Le monde <accent><world></accent> n'existe pas sur ce serveur."
+  already-searching: "<error>Recherche d'un endroit déjà en cours…"
+  cooldown: "<error>Prochain <accent>/rtp</accent> possible dans <accent><time></accent>."
+  searching: "<info>Recherche d'un endroit sûr…"
+  failed: "<error>Aucun endroit sûr trouvé cette fois : réessaie."
+  worlds:
+    world: "Monde"
+    world_nether: "Nether"
+    world_the_end: "End"
+  menu:
+    title: "<primary>Téléportation aléatoire"
+    player: "<accent><player>"
+    ready: "<success>● <info>Prêt à partir"
+    cooldown: "<error>● <info>Prochain départ dans <accent><time>"
+    world: "<accent><world>"
+    radius: "<dark_gray>▸ <info>Entre <accent><min></accent> et <accent><max></accent> blocs du spawn"
+    click: "<accent>Clic <dark_gray>· <info>partir à l'aventure"
+

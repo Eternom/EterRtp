@@ -1,0 +1,29 @@
+name: EterRtp
+version: '${version}'
+
+main: fr.eternom.eterRtp.Main
+api-version: '26.2'
+load: POSTWORLD
+authors: [ NadTum ]
+description: Téléportation aléatoire dans les mondes de ce serveur (survie).
+depend: [EterLib]
+
+commands:
+  rtp:
+    description: Partir au hasard dans un monde de ce serveur.
+    usage: /rtp
+    aliases: [randomtp, wild]
+    permission: eterrtp.use
+
+permissions:
+  eterrtp.use:
+    default: true
+  eterrtp.bypass.cooldown:
+    description: Pas de délai entre deux /rtp.
+    default: op
+  eterrtp.admin:
+    description: Toutes les permissions d'EterRtp.
+    default: op
+    children:
+      eterrtp.use: true
+      eterrtp.bypass.cooldown: true

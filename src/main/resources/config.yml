@@ -1,0 +1,39 @@
+# ============================================================
+#  EterRtp : téléportation aléatoire (/rtp)
+# ============================================================
+#
+#  À installer seulement sur les serveurs où l'on explore (survie), pas sur un lobby.
+#  Les règles communes (combat, délai entre téléportations, attente) se règlent dans
+#  EterLib/config.yml > teleport. Les textes sont dans lang/.
+#  Toute modification nécessite un redémarrage du serveur.
+
+rtp:
+  # Délai entre deux /rtp, en secondes, valable sur tout le réseau (1800 = 30 minutes).
+  # 0 le désactive. La permission eterrtp.bypass.cooldown en dispense.
+  cooldown: 1800
+
+  # Nombre d'endroits essayés au hasard avant d'abandonner (eau, lave, vide...).
+  attempts: 10
+
+  # Mondes de CE serveur proposés dans le menu (4 au maximum), avec leur icône et la
+  # distance d'arrivée autour du point d'apparition du monde, en blocs.
+  # Le nom affiché se règle dans lang/ (rtp.worlds.<monde>).
+  worlds:
+    world:
+      icon: GRASS_BLOCK
+      min-radius: 500
+      max-radius: 5000
+    world_nether:
+      icon: NETHERRACK
+      min-radius: 200
+      max-radius: 1000
+    world_the_end:
+      icon: END_STONE
+      min-radius: 1000
+      max-radius: 3000
+
+# Menus : bouton en bas du menu. Avec une commande (sans le /), il la lance pour le joueur et relie
+# les menus entre eux (ex : "profile" pour revenir au menu du profil) ; vide, il ferme le menu.
+menus:
+  rtp:
+    back-command: ""
