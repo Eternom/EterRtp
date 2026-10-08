@@ -6,7 +6,7 @@ Document développeur, à tenir à jour avec le code.
 
 ## Prérequis
 
-- **EterLib 1.7.0+** (`depend`) : base, Redis (facultatif), langues et textes communs, menus (cadre, bouton Retour),
+- **EterLib 1.8.0+** (`depend`) : base, Redis (obligatoire), langues et textes communs, menus (cadre, bouton Retour),
   durées lisibles et téléportation commune.
 
 ## Fonctionnement
@@ -17,8 +17,8 @@ Document développeur, à tenir à jour avec le code.
   (pas de lag), `attempts` essais ; jamais sur lave, eau, feu, cactus... Une seule recherche à la fois par joueur.
 - **Départ** : par la téléportation commune d'EterLib (combat, délai commun, attente). Le délai propre au `/rtp`
   (`rtp.cooldown`, 30 min) ne démarre que si le joueur part vraiment.
-- **Délai** (`RtpCooldown`) : valable sur tout le réseau. Avec Redis : clé `rtp:cooldown:<uuid>` qui expire seule ;
-  sans Redis : table `eterrtp_cooldowns`. Jamais en mémoire (sinon il suffirait de changer de serveur).
+- **Délai** (`RtpCooldown`) : valable sur tout le réseau : clé Redis `rtp:cooldown:<uuid>` qui expire seule.
+  Jamais en mémoire (sinon il suffirait de changer de serveur).
 
 ## Commande et permissions
 
