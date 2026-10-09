@@ -1,11 +1,13 @@
 package fr.eternom.eterRtp.module.rtp;
 
 import fr.eternom.eterLib.EterLib;
+import fr.eternom.eterLib.helper.cache.Cooldowns;
 import fr.eternom.eterLib.helper.gui.BackButton;
 import fr.eternom.eterLib.helper.message.Messages;
 import fr.eternom.eterLib.helper.task.Tasks;
 import fr.eternom.eterLib.module.teleport.Destination;
 import fr.eternom.eterLib.module.teleport.TeleportService;
+import fr.eternom.eterRtp.api.RtpApi;
 import org.bukkit.Bukkit;
 import org.bukkit.HeightMap;
 import org.bukkit.Location;
@@ -28,7 +30,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * Paper (pas de lag), plusieurs essais au hasard dans l'anneau minRadius-maxRadius. Le départ passe ensuite par
  * EterLib (combat, délai commun, attente) ; le délai du rtp ne démarre que si le joueur part vraiment.
  */
-public class RtpService {
+public class RtpService implements RtpApi {
 
     public static final String BYPASS_COOLDOWN = "eterrtp.bypass.cooldown";
 
@@ -38,7 +40,7 @@ public class RtpService {
             Material.SWEET_BERRY_BUSH, Material.POINTED_DRIPSTONE, Material.BEDROCK, Material.WATER);
 
     private final JavaPlugin plugin;
-    private final RtpCooldown cooldown;
+    private final Cooldowns cooldown;
     private final TeleportService teleports;
     private final Messages messages;
     private final String serverName;
@@ -48,7 +50,7 @@ public class RtpService {
     /** Joueurs dont la recherche est en cours : un seul /rtp à la fois. */
     private final Set<UUID> searching = ConcurrentHashMap.newKeySet();
 
-    public RtpService(JavaPlugin plugin, RtpCooldown cooldown, TeleportService teleports, Messages messages, String serverName,
+    public RtpService(JavaPlugin plugin, Cooldowns cooldown, TeleportService teleports, Messages messages, String serverName,
                       List<RtpWorld> worlds, int attempts, BackButton backButton) {
         this.plugin = plugin;
         this.cooldown = cooldown;
@@ -68,8 +70,34 @@ public class RtpService {
         return backButton;
     }
 
-    public List<RtpWorld> worlds() {
+    public List<RtpWorld> rtpWorlds() {
         return worlds;
+    }
+
+    @Override
+    public List<String> worlds() {
+        return worlds.stream().map(RtpWorld::world).toList();
+    }
+
+    @Override
+    public long cooldownSeconds(Player player) {
+        return remainingSeconds(player);
+    }
+
+    @Override
+    public void teleport(Player player, String world) {
+        worlds.stream().filter(choice -> choice.world().equals(world)).findFirst().ifPresentOrElse(choice -> start(player, choice),
+                () -> messages.send(player, "rtp.world-missing", "world", world));
+    }
+
+    @Override
+    public void teleport(Player player, World world, int minRadius, int maxRadius) {
+        if (!searching.add(player.getUniqueId())) {
+            messages.send(player, "rtp.already-searching");
+            return;
+        }
+        messages.actionBar(player, "rtp.searching");
+        search(player, world, Math.max(0, minRadius), Math.max(minRadius + 1, maxRadius), false, 1);
     }
 
     /** Ouvre le menu, avec le délai restant du joueur. */
@@ -101,7 +129,7 @@ public class RtpService {
                 return;
             }
             messages.actionBar(player, "rtp.searching");
-            search(player, world, choice, 1);
+            search(player, world, choice.minRadius(), choice.maxRadius(), true, 1);
         }, () -> {
             searching.remove(player.getUniqueId());
             messages.send(player, "error.generic");
@@ -113,12 +141,12 @@ public class RtpService {
         return player.hasPermission(BYPASS_COOLDOWN) ? 0 : cooldown.remainingSeconds(player.getUniqueId());
     }
 
-    /** Un essai : charge le chunk en tâche de fond, puis (thread principal) vérifie l'endroit. */
-    private void search(Player player, World world, RtpWorld choice, int attempt) {
+    /** Un essai : charge le chunk en tâche de fond, puis (thread principal) vérifie l'endroit. withCooldown : délai du rtp. */
+    private void search(Player player, World world, int minRadius, int maxRadius, boolean withCooldown, int attempt) {
         Location center = world.getSpawnLocation();
         ThreadLocalRandom random = ThreadLocalRandom.current();
         double angle = random.nextDouble(Math.PI * 2);
-        double distance = random.nextDouble(choice.minRadius(), choice.maxRadius());
+        double distance = random.nextDouble(minRadius, maxRadius);
         int x = center.getBlockX() + (int) (Math.cos(angle) * distance);
         int z = center.getBlockZ() + (int) (Math.sin(angle) * distance);
 
@@ -134,9 +162,13 @@ public class RtpService {
                 UUID uuid = player.getUniqueId();
                 teleports.teleport(player, Destination.at(serverName, world.getName(), found.getX(), found.getY(), found.getZ(),
                                 found.getYaw(), 0, messages.plain(player, "rtp.label")),
-                        () -> Tasks.async(plugin, () -> cooldown.start(uuid), "Délai de /rtp non enregistré pour " + player.getName()));
+                        () -> {
+                            if (withCooldown) {
+                                Tasks.async(plugin, () -> cooldown.start(uuid), "Délai de /rtp non enregistré pour " + player.getName());
+                            }
+                        });
             } else if (attempt < attempts) {
-                search(player, world, choice, attempt + 1);
+                search(player, world, minRadius, maxRadius, withCooldown, attempt + 1);
             } else {
                 searching.remove(player.getUniqueId());
                 messages.send(player, "rtp.failed");

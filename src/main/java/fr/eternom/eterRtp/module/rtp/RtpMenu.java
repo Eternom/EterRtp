@@ -81,7 +81,7 @@ class RtpMenu implements Menu {
 
     private void render() {
         Frame.draw(inventory, Material.ORANGE_STAINED_GLASS_PANE);
-        List<RtpWorld> worlds = service.worlds();
+        List<RtpWorld> worlds = service.rtpWorlds();
         List<Integer> slots = LAYOUTS.get(Math.min(worlds.size(), LAYOUTS.size()) - 1);
         for (int i = 0; i < slots.size(); i++) {
             RtpWorld world = worlds.get(i);
