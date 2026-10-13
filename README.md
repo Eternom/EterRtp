@@ -26,6 +26,7 @@ Document développeur, à tenir à jour avec le code.
 |---|---|---|
 | `/rtp` (`/randomtp`, `/wild`) | `eterrtp.use` (tous) | Menu des mondes où partir au hasard |
 
+`eterrtp.cooldown.<minutes>` : délai raccourci (grades), le plus court l'emporte, jamais plus long que `rtp.cooldown`.
 `eterrtp.bypass.cooldown` (op) : pas de délai propre au `/rtp`. `eterrtp.admin` regroupe tout.
 Bouton du bas du menu : `menus.rtp.back-command` (vide = fermer).
 

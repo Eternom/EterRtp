@@ -9,7 +9,8 @@
 
 rtp:
   # Délai entre deux /rtp, en secondes, valable sur tout le réseau (1800 = 30 minutes).
-  # 0 le désactive. La permission eterrtp.bypass.cooldown en dispense.
+  # 0 le désactive. La permission eterrtp.cooldown.<minutes> le raccourcit (ex : eterrtp.cooldown.15 pour un
+  # grade), jamais au-delà de cette valeur ; eterrtp.bypass.cooldown en dispense.
   cooldown: 1800
 
   # Nombre d'endroits essayés au hasard avant d'abandonner (eau, lave, vide...).

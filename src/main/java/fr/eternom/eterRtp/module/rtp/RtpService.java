@@ -15,8 +15,10 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -33,6 +35,8 @@ import java.util.concurrent.ThreadLocalRandom;
 public class RtpService implements RtpApi {
 
     public static final String BYPASS_COOLDOWN = "eterrtp.bypass.cooldown";
+    /** eterrtp.cooldown.<minutes> : délai réduit (grades), jamais plus long que celui de la config. */
+    private static final String COOLDOWN_PREFIX = "eterrtp.cooldown.";
 
     /** Sol sur lequel on ne fait jamais arriver un joueur. */
     private static final Set<Material> UNSAFE_GROUND = Set.of(Material.LAVA, Material.MAGMA_BLOCK, Material.CACTUS,
@@ -41,6 +45,8 @@ public class RtpService implements RtpApi {
 
     private final JavaPlugin plugin;
     private final Cooldowns cooldown;
+    /** Délai de la config, en secondes : c'est toujours lui qui est enregistré (voir remainingSeconds). */
+    private final long baseCooldown;
     private final TeleportService teleports;
     private final Messages messages;
     private final String serverName;
@@ -50,10 +56,11 @@ public class RtpService implements RtpApi {
     /** Joueurs dont la recherche est en cours : un seul /rtp à la fois. */
     private final Set<UUID> searching = ConcurrentHashMap.newKeySet();
 
-    public RtpService(JavaPlugin plugin, Cooldowns cooldown, TeleportService teleports, Messages messages, String serverName,
-                      List<RtpWorld> worlds, int attempts, BackButton backButton) {
+    public RtpService(JavaPlugin plugin, Cooldowns cooldown, Duration baseCooldown, TeleportService teleports, Messages messages,
+                      String serverName, List<RtpWorld> worlds, int attempts, BackButton backButton) {
         this.plugin = plugin;
         this.cooldown = cooldown;
+        this.baseCooldown = baseCooldown.toSeconds();
         this.teleports = teleports;
         this.messages = messages;
         this.serverName = serverName;
@@ -136,9 +143,32 @@ public class RtpService implements RtpApi {
         });
     }
 
-    /** Bloquant. 0 si le joueur est dispensé. */
+    /**
+     * Bloquant. 0 si le joueur est dispensé. Le délai est enregistré avec la durée de la config ; un délai réduit en
+     * retire simplement la différence, ce qui reste juste si le grade change entre deux /rtp.
+     */
     long remainingSeconds(Player player) {
-        return player.hasPermission(BYPASS_COOLDOWN) ? 0 : cooldown.remainingSeconds(player.getUniqueId());
+        if (player.hasPermission(BYPASS_COOLDOWN)) {
+            return 0;
+        }
+        long reduction = baseCooldown - cooldownFor(player);
+        return Math.max(0, cooldown.remainingSeconds(player.getUniqueId()) - reduction);
+    }
+
+    /** Délai du joueur en secondes : le plus court eterrtp.cooldown.<minutes> qu'il a, sans dépasser celui de la config. */
+    private long cooldownFor(Player player) {
+        long seconds = baseCooldown;
+        for (PermissionAttachmentInfo info : player.getEffectivePermissions()) {
+            String permission = info.getPermission();
+            if (info.getValue() && permission.startsWith(COOLDOWN_PREFIX)) {
+                try {
+                    seconds = Math.min(seconds, Math.max(0, Long.parseLong(permission.substring(COOLDOWN_PREFIX.length()))) * 60);
+                } catch (NumberFormatException ignored) {
+                    // eterrtp.cooldown.* ou autre valeur non numérique
+                }
+            }
+        }
+        return seconds;
     }
 
     /** Un essai : charge le chunk en tâche de fond, puis (thread principal) vérifie l'endroit. withCooldown : délai du rtp. */

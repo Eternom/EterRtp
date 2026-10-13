@@ -40,9 +40,9 @@ public final class Main extends JavaPlugin {
         EterLib lib = EterLib.get();
         messages = lib.messages(this, "en_us", "fr_fr");
         // Délai propre au /rtp, sur tout le réseau (clé Redis rtp:cooldown:<uuid>)
-        Cooldowns cooldown = new Cooldowns(lib.getRedis(), "rtp:cooldown",
-                Duration.ofSeconds(Math.max(0, getConfig().getInt("rtp.cooldown", 1800))));
-        rtp = new RtpService(this, cooldown, lib.getTeleports(), messages, lib.getServerName(),
+        Duration cooldownDuration = Duration.ofSeconds(Math.max(0, getConfig().getInt("rtp.cooldown", 1800)));
+        Cooldowns cooldown = new Cooldowns(lib.getRedis(), "rtp:cooldown", cooldownDuration);
+        rtp = new RtpService(this, cooldown, cooldownDuration, lib.getTeleports(), messages, lib.getServerName(),
                 RtpWorld.load(getConfig().getConfigurationSection("rtp.worlds"), getLogger()), getConfig().getInt("rtp.attempts", 10),
                 lib.backButton(getConfig().getString("menus.rtp.back-command", "")));
 
