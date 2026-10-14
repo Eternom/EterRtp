@@ -19,7 +19,7 @@ import java.time.Duration;
 public final class Main extends JavaPlugin {
 
     /** Version minimale d'EterLib : délais partagés (Cooldowns) depuis 1.10.0. */
-    private static final String REQUIRED_ETERLIB = "1.10.0";
+    private static final String REQUIRED_ETERLIB = "1.15.0";
 
     private Messages messages;
     private RtpService rtp;

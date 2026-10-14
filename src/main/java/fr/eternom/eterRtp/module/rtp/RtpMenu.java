@@ -9,7 +9,6 @@ import fr.eternom.eterLib.helper.message.Messages;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.Inventory;
@@ -66,7 +65,7 @@ class RtpMenu implements Menu {
             return;
         }
         if (remainingSeconds() > 0) {
-            player.playSound(player, Sound.ENTITY_VILLAGER_NO, 0.6f, 1f);
+            Sounds.refuse(player);
             return;
         }
         Sounds.click(player);

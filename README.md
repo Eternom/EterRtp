@@ -6,7 +6,7 @@ Document développeur, à tenir à jour avec le code.
 
 ## Prérequis
 
-- **EterLib 1.10.0+** (`depend`) : base, Redis (obligatoire), langues et textes communs, menus (cadre, bouton Retour),
+- **EterLib 1.15.0+** (`depend`) : base, Redis (obligatoire), langues et textes communs, menus (cadre, bouton Retour),
   durées lisibles et téléportation commune.
 
 ## Fonctionnement
