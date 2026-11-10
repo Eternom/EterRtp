@@ -37,4 +37,4 @@ rtp:
 # les menus entre eux (ex : "profile" pour revenir au menu du profil) ; vide, il ferme le menu.
 menus:
   rtp:
-    back-command: "menu voyager"
+    back-command: "menu travel"
