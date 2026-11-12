@@ -186,6 +186,10 @@ public class RtpService implements RtpApi {
                 return;
             }
             Location found = safeLocation(world, x, z);
+            // Jamais dans (ni juste à côté) du terrain d'un clan : on cherche ailleurs
+            if (found != null && ClanCheck.nearClaim(found)) {
+                found = null;
+            }
             if (found != null) {
                 searching.remove(player.getUniqueId());
                 found.setYaw(player.getLocation().getYaw());

@@ -25,6 +25,8 @@ dependencies {
 
     // Socle commun : base, langues, menus, serveurs du réseau (plugin EterLib installé sur le serveur)
     compileOnly("com.github.Eternom:EterLib:1.20.1")
+    // Terrain des clans : le /rtp n'y arrive pas (facultatif)
+    compileOnly("com.github.Eternom:EterClan:1.10.0")
 }
 
 java {
